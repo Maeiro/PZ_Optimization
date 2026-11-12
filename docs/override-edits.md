@@ -4320,6 +4320,10 @@ itself, and `addBlood` hands the shared buffer on to the clothing-blood helper i
 splats, the widest window of any of the fourteen. `getBodyPartClothingDefense` is reached from the same `update()` by a
 second, independent route (the falling / landing / fell-on-knees chain).
 
+`addHole` returns without applying the cosmetic clothing tear when the character has no `HumanVisual`. Build 42.21 can reach
+this path during a fall before that visual exists; `BloodClothingType.addHole` dereferences it and would otherwise abort the
+world update, after which the game's exception recovery copies the world and can stall the session.
+
 The jar's field itself stays declared, with its name, type and `protected static final` access, because
 `scripts/build.sh` requires every non-private member of a shadowed class to survive so anything compiled against the
 shipped class still links; nothing reads it any more. Since the locals shadow it, a method that missed its local would

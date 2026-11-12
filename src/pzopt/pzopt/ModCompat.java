@@ -60,6 +60,8 @@ public final class ModCompat {
       // soundList readers), runs with ours + it on Louisville 2026-09-24; of ours it patches only IsoChunkMap.CalcChunkWidth
       // (an edit without a switch). Its 42.20 build logs one bucket overflow of its own on 42.21 (mc-pzmc)
       {"PZMulticore", "ok"},
+      // Viewpoint's SkeletonPort shares pending slots across ModelSlot.Update calls; worker updates corrupt that batch.
+      {"Viewpoint", "off:animatorParallel"},
    };
 
    static final String ZB_PATCH = "Lme/zed_0xff/zombie_buddy/Patch;";
@@ -522,6 +524,12 @@ public final class ModCompat {
       Map<String, File> m = new LinkedHashMap<>();
       List<File> roots = new ArrayList<>();
       roots.add(new File(UserOptions.zomboidDir(), "mods"));
+      File[] localItems = new File(UserOptions.zomboidDir(), "Workshop").listFiles();
+      if (localItems != null) {
+         for (File item : localItems) {
+            roots.add(new File(item, "Contents/mods"));
+         }
+      }
       File game = new File("").getAbsoluteFile(); // the game dir: the launcher's working directory
       roots.add(new File(game, "mods"));
       File steamapps = game.getParentFile() != null && game.getParentFile().getParentFile() != null

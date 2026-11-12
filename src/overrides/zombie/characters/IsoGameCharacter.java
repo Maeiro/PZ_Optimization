@@ -13324,6 +13324,7 @@ public abstract class IsoGameCharacter
       }
 
       HumanVisual humanVisual = ((IHumanVisual)this).getHumanVisual();
+      if (humanVisual == null) return false; // pzopt: missing visual during a fall must not abort the world update
       ItemVisuals tempItemVisuals = pzoptTempItemVisuals.get(); // pzopt: entityUpdateParallel
       this.getItemVisuals(tempItemVisuals);
       boolean addedHole = BloodClothingType.addHole(part, humanVisual, tempItemVisuals, allLayers);

@@ -89,6 +89,15 @@ public class ModCompatTest {
       policy.put("modA", "off:luaSkipEmpty");
       ModCompat.applyForTest(all, edited, policy, rule, "auto");
       Check.check(rule.size() == 1 && "false".equals(rule.getProperty("luaSkipEmpty")), "an off: rule replaces the method's keys: " + rule);
+      Map<String, String> known = new HashMap<>();
+      for (String[] entry : ModCompat.KNOWN) {
+         known.put(entry[0], entry[1]);
+      }
+      Properties viewpoint = new Properties();
+      ModCompat.applyForTest(List.of(new ModCompat.Hit("Viewpoint", "zombie/core/skinnedmodel/ModelManager$ModelSlot", "Update",
+            "ZombieBuddy @Patch")), edited, known, viewpoint, "report");
+      Check.check(viewpoint.size() == 1 && "false".equals(viewpoint.getProperty("animatorParallel")),
+            "Viewpoint's shared skeleton batch disables worker model updates even in report mode: " + viewpoint);
       System.out.println("ModCompatTest ok");
    }
 }
