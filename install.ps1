@@ -19,8 +19,8 @@ game is waited for: quit it and the install (or -Uninstall) goes on.
   .\install.ps1 -Force       # replace class files another Java mod put into the game folder (moved aside first)
 
 Without downloading anything first (PowerShell, any folder; the Steam Workshop copy is used when present):
-  irm https://github.com/xD3I/PZ_Optimization/releases/latest/download/install.ps1 | iex
-  irm https://github.com/xD3I/PZ_Optimization/releases/latest/download/uninstall.ps1 | iex
+  irm https://github.com/Maeiro/PZ_Optimization/releases/latest/download/install.ps1 | iex
+  irm https://github.com/Maeiro/PZ_Optimization/releases/latest/download/uninstall.ps1 | iex
 
 Every install also leaves Uninstall-PZ-Optimization.cmd in the game folder (Steam: Manage > Browse local files):
 double-click it to remove PZ Optimization without starting the game; it runs the copy of this script kept in
@@ -49,7 +49,7 @@ if (-not $PSCommandPath) {
   # exit codes, $PSScriptRoot and the parameters behave as with -File.
   [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
   $self = Join-Path ([IO.Path]::GetTempPath()) 'pzopt-install.ps1'
-  Invoke-WebRequest -UseBasicParsing -Uri 'https://github.com/xD3I/PZ_Optimization/releases/latest/download/install.ps1' -OutFile $self
+  Invoke-WebRequest -UseBasicParsing -Uri 'https://github.com/Maeiro/PZ_Optimization/releases/latest/download/install.ps1' -OutFile $self
   $argv = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $self)
   foreach ($k in $PSBoundParameters.Keys) {
     $v = $PSBoundParameters[$k]
@@ -61,7 +61,7 @@ if (-not $PSCommandPath) {
 $ErrorActionPreference = 'Stop'
 # GitHub needs TLS 1.2; Windows PowerShell 5.1 on older Windows offers 1.0 / 1.1 only by default
 [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
-$RepoSlug = 'xD3I/PZ_Optimization'
+$RepoSlug = 'Maeiro/PZ_Optimization'
 $WorkshopId = '3805285544'
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 
@@ -467,7 +467,7 @@ if (-not $Zip -and -not $From -and $PSScriptRoot) {
   $sibling = Join-Path $PSScriptRoot 'pzopt-classes'
   if (Test-Path (Join-Path $sibling 'pzopt\build-info.properties')) { $From = $sibling }
 }
-if (-not $Zip -and -not $From -and -not $Tag) {
+if (-not $Zip -and -not $From -and -not $Tag -and $RepoSlug -eq "xD3I/PZ_Optimization") {
   $From = Find-WorkshopCopy
   if ($From) { Write-Host "found the Steam Workshop copy for revision $Rev" }
 }
@@ -483,7 +483,11 @@ if ($From) {
   if ($gh) { & gh auth status 2>$null | Out-Null; $ghOk = ($LASTEXITCODE -eq 0) }
   if ($ghOk) {
     if (-not $Tag) {
-      $Tag = (& gh release list -R $RepoSlug --json tagName -q '.[].tagName') | Where-Object { $_ -match "-$Rev(-|$)" } | Select-Object -First 1
+      $rels = (& gh api "repos/$RepoSlug/releases?per_page=50") | ConvertFrom-Json
+      if ($LASTEXITCODE -ne 0) { Fail 'gh release lookup failed' }
+      $Tag = ($rels | Sort-Object published_at -Descending | Where-Object {
+        -not $_.draft -and -not $_.prerelease -and ($_.assets.name -contains $pattern)
+      } | Select-Object -First 1).tag_name
       if (-not $Tag) { Fail "no release for game revision $Rev (your game is a build these classes were not built for)" }
     }
     Write-Host "downloading $pattern from release $Tag"

@@ -59,7 +59,7 @@ import org.json.JSONObject;
  * Every state is a string the Lua polls once a frame through the PerformanceSettings forwards.
  */
 public final class Updater {
-   public static final String REPO_SLUG = "xD3I/PZ_Optimization";
+   public static final String REPO_SLUG = "Maeiro/PZ_Optimization";
    static final String API = "https://api.github.com/repos/" + REPO_SLUG + "/releases?per_page=30";
    static final String RELEASES_PAGE = "https://github.com/" + REPO_SLUG + "/releases";
    static final String WEB_LATEST = "https://github.com/" + REPO_SLUG + "/releases/latest";
@@ -242,7 +242,7 @@ public final class Updater {
       // the GitHub request goes out first; the Workshop copy is read while it is in flight
       CompletableFuture<Releases> remote = CompletableFuture.supplyAsync(() -> releases(rev), Updater::onOwnThread);
       Release local = null;
-      if (Config.UPDATE_FROM_WORKSHOP) {
+      if (Config.UPDATE_FROM_WORKSHOP && REPO_SLUG.equals("xD3I/PZ_Optimization")) {
          try {
             local = findWorkshopCopy(game, rev);
          } catch (Exception e) {

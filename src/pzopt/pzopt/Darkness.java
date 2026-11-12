@@ -221,6 +221,7 @@ public final class Darkness {
    private static boolean alternateOn = true;
    private static final FrameState[] STATES = {new FrameState(), new FrameState(), new FrameState(), new FrameState()};
    private static int stateIndex;
+   private static boolean frameStateActive;
 
    /** The render-side switches of one frame, set in stream order ahead of its vision pass and composite. */
    private static final class FrameState extends TextureDraw.GenericDrawer {
@@ -256,10 +257,16 @@ public final class Darkness {
          alternateOn = !alternateOn;
       }
       Grade.frame();
-      FrameState st = STATES[stateIndex++ & 3];
-      st.grade = Grade.enabled() && frameOn();
-      st.memory = memoryEnabled() && frameOn();
-      SpriteRenderer.instance.drawGeneric(st);
+      boolean grade = Grade.enabled() && frameOn();
+      boolean memory = memoryEnabled() && frameOn();
+      // Keep the final off command in stream order when an effect is disabled.
+      if (grade || memory || frameStateActive) {
+         FrameState st = STATES[stateIndex++ & 3];
+         st.grade = grade;
+         st.memory = memory;
+         SpriteRenderer.instance.drawGeneric(st);
+         frameStateActive = grade || memory;
+      }
       long now = System.nanoTime();
       if ((Config.DEV_DARK_STATS || Config.DEV_DARK_ALTERNATE > 0) && now - lastStatsNs > 10_000_000_000L) {
          lastStatsNs = now;

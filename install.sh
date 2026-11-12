@@ -11,9 +11,9 @@
 #   ./install.sh --force      # replace class files another Java mod put into the game folder (moved aside first)
 #
 # Without downloading anything first (any folder; the Steam Workshop copy is used when present):
-#   curl -fsSL https://github.com/xD3I/PZ_Optimization/releases/latest/download/install.sh | bash
-#   curl -fsSL https://github.com/xD3I/PZ_Optimization/releases/latest/download/install.sh | bash -s -- --uninstall
-#   curl -fsSL https://github.com/xD3I/PZ_Optimization/releases/latest/download/uninstall.sh | bash
+#   curl -fsSL https://github.com/Maeiro/PZ_Optimization/releases/latest/download/install.sh | bash
+#   curl -fsSL https://github.com/Maeiro/PZ_Optimization/releases/latest/download/install.sh | bash -s -- --uninstall
+#   curl -fsSL https://github.com/Maeiro/PZ_Optimization/releases/latest/download/uninstall.sh | bash
 #
 # Every install also leaves uninstall-pz-optimization.bash in the game folder: `bash <game folder>/uninstall-pz-optimization.bash`
 # removes PZ Optimization without starting the game (it runs the copy of this script kept in pzopt/uninstall/).
@@ -33,7 +33,7 @@
 # and the install (or --uninstall) goes on.
 set -euo pipefail
 
-REPO_SLUG="xD3I/PZ_Optimization"
+REPO_SLUG="Maeiro/PZ_Optimization"
 WORKSHOP_ID="3805285544"
 mode=install; zip=""; from=""; dir="${PZ_DIR:-}"; tag=""; force=0
 while [[ $# -gt 0 ]]; do
@@ -426,7 +426,7 @@ if [[ -z "$zip" && -z "$from" && -f "${BASH_SOURCE[0]:-}" ]]; then
   sibling="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/pzopt-classes"
   [[ -f "$sibling/pzopt/build-info.properties" ]] && from="$sibling"
 fi
-if [[ -z "$zip" && -z "$from" && -z "$tag" ]]; then
+if [[ -z "$zip" && -z "$from" && -z "$tag" && "$REPO_SLUG" == "xD3I/PZ_Optimization" ]]; then
   from=$(workshop_copy)
   if [[ -n "$from" ]]; then echo "found the Steam Workshop copy for revision $REV"; fi
 fi
@@ -439,7 +439,7 @@ elif [[ -z "$zip" ]]; then
   if command -v gh >/dev/null && gh auth status >/dev/null 2>&1; then
     if [[ -z "$tag" ]]; then
       # newest published first: the API's own order is by the tagged commit, not by publish date
-      tag=$(gh release list -R "$REPO_SLUG" --json tagName,publishedAt -q 'sort_by(.publishedAt) | reverse | .[].tagName' | grep -- "-${REV}-\|-${REV}\$" | head -1 || true)
+      tag=$(gh api "repos/$REPO_SLUG/releases?per_page=50" --jq "sort_by(.published_at) | reverse | map(select(.draft == false and .prerelease == false and any(.assets[]; .name == \"$pattern\")))[0].tag_name // empty")
       [[ -n "$tag" ]] || die "no release for game revision $REV (your game is a build these classes were not built for)"
     fi
     echo "downloading $pattern from release $tag"

@@ -1,3 +1,23 @@
+## Viewpoint RC4 compatibility fork
+
+For Project Zomboid Build 42.22.2 (revision `3d39148846`). Removes inactive lighting commands that prevent Viewpoint 0.1.7 RC4 from rendering between simulation ticks. Active effects retain their original render commands, including the final command when switched off. Other render commands may still prevent intermediate frames; FPS has not yet been verified in-game.
+
+Install on Windows (PowerShell):
+
+```powershell
+irm https://github.com/Maeiro/PZ_Optimization/releases/latest/download/install.ps1 | iex
+```
+
+Then paste the Steam launch option printed by the installer into Project Zomboid > Properties > General > Launch Options. Keep existing arguments after `%command%`. Close the game before installing.
+
+Linux/macOS:
+
+```sh
+curl -fsSL https://github.com/Maeiro/PZ_Optimization/releases/latest/download/install.sh | bash
+```
+
+Fork updates come from this repository; the upstream Workshop copy is not used automatically. Upscaler dependencies still come from upstream. The original project documentation follows.
+
 <h1 align="center">Project Zomboid without the stutter</h1>
 
 <p align="center">

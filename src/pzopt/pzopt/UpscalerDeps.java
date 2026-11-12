@@ -232,7 +232,7 @@ public final class UpscalerDeps {
     * tag name, and a page of it held no DLSS release once the class-override releases had filled it (2026-09-29).
     */
    static JSONArray platformReleases(Platform platform) throws Exception {
-      String repo = "https://api.github.com/repos/" + Updater.REPO_SLUG;
+      String repo = "https://api.github.com/repos/xD3I/PZ_Optimization";
       String json = "application/vnd.github+json";
       JSONArray refs = new JSONArray(Updater.get(repo + "/git/matching-refs/tags/" + platform.tagPrefix(), json));
       JSONArray releases = new JSONArray();
